@@ -39,30 +39,26 @@ def parse_lg_file(filepath):
 
 # Function to convert bounding box coordinates to YOLO format
 def convert_to_yolo_format(bbox, width, height):
-	x_center = (bbox[0] + bbox[2]) / (2 * width)
-	y_center = (bbox[1] + bbox[3]) / (2 * height)
-	bbox_width = (bbox[2] - bbox[0]) / width
-	bbox_height = (bbox[3] - bbox[1]) / height
+	x_min = min(bbox[0], bbox[2])
+	x_max = max(bbox[0], bbox[2])
+	y_min = min(bbox[1], bbox[3])
+	y_max = max(bbox[1], bbox[3])
+	x_center = (x_min + x_max) / (2 * width)
+	y_center = (y_min + y_max) / (2 * height)
+	bbox_width = (x_max - x_min) / width
+	bbox_height = (y_max - y_min) / height
 	return x_center, y_center, bbox_width, bbox_height
 
 def main():
 
 	project_dir = os.path.dirname(os.getcwd())
 
-	data_dir = project_dir + '/data'
+	data_dir = project_dir + '/datasets'
 
-	input_dir = data_dir + '/TC11_CROHME23'
+	input_dir = os.path.dirname(project_dir) + '/data/TC11_CROHME23'
 
 	input_images_dir = input_dir + '/IMG/train/OffHME'
 	input_lg_dir = input_dir + '/SymLG/train/OffHME'
-
-	# input_train_images_dir = input_images_dir + '/train/OffHME'
-	# input_val_images_dir = input_images_dir + '/val/CROHME2023_val'
-	# input_test_images_dir = input_images_dir + '/test/CROHME2023_test'
-
-	# input_train_labels_dir = input_lg_dir + '/train/OffHME'
-	# input_val_labels_dir = input_lg_dir + '/val/CROHME2023_val'
-	# input_test_labels_dir = input_lg_dir + '/test/CROHME2023_test'
 
 	output_dir = data_dir + '/custom_dataset'
 
@@ -90,6 +86,8 @@ def main():
 	val_size = int(len(all_images) * 0.15)
 	test_size = int(len(all_images) * 0.15)
 
+	# sample_images = [input_images_dir + '/00007.png']
+
 	for i, img_filepath in enumerate(all_images):
 
 		objects = []
@@ -103,6 +101,8 @@ def main():
 		img = cv2.imread(img_filepath)
 		image_height, image_width, _ = img.shape
 
+		# print(img.shape)
+
 		with open(lg_filepath, 'r') as file:
 			for line in file:
 				if line.startswith('O'):
@@ -113,6 +113,7 @@ def main():
 					bb = line.split(', ')[1:6]
 					bb[-1] = bb[-1].replace('\n','')
 					bb[1:5] = map(float, bb[1:5])
+					# print(bb)
 					bbox.append(bb)
 
 		for j, obj in enumerate(objects):
@@ -124,6 +125,7 @@ def main():
 			class_index = class_mapping.get(symbol_class, -1)
 
 			if class_index != -1:
+				# print((class_index,) + bbox_yolo)
 				yolo_boxes.append((class_index,) + bbox_yolo)
 
 		if i < train_size:
@@ -142,6 +144,9 @@ def main():
 		with open(lbl_dest_folder + '/' + lbl_filename, 'w') as label:
 			for yb in yolo_boxes:
 				label.write(f"{yb[0]} {' '.join(str(coord) for coord in yb[1:5])}\n")
+
+		if i % 100 == 0 :
+			print(f"Completed {i} images..")
 
 	with open(os.path.join(data_dir, 'class_mapping.txt'), 'w') as class_mapping_file:
 		for symbol_class, index in class_mapping.items():

@@ -2,3 +2,10 @@
 .DS_Store
 datasets/
 yolov5/
+/src/notebooks/.ipynb_checkpoints
+/.virtual_documents
+/src/notebooks/.virtual_documents
+
+*.zip
+src/notebooks/.ipynb_checkpoints/CROHME EDA-checkpoint.ipynb
+src/notebooks/.ipynb_checkpoints/YOLO-checkpoint.ipynb
