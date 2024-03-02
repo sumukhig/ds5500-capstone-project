@@ -60,7 +60,7 @@ def main():
 	input_images_dir = input_dir + '/IMG/train/OffHME'
 	input_lg_dir = input_dir + '/SymLG/train/OffHME'
 
-	output_dir = data_dir + '/custom_dataset'
+	output_dir = data_dir + '/detection_dataset'
 
 	output_images_dir = output_dir + '/images'
 	output_labels_dir = output_dir + '/labels'
